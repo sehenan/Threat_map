@@ -1,0 +1,25 @@
+search index=threatmap sourcetype="threatmap:event"
+``` Template: Generic JSON events (any tool, sent to the HTTP Event Collector). ```
+``` Modele : evenements JSON generiques (tout outil, envoyes au HTTP Event Collector).
+    Pour un produit sans modele : il envoie un objet JSON avec les champs ci-dessous,
+    tous facultatifs sauf signature.
+      src_ip (ou src), signature (ou name, title), severity, dest_host (ou dest, target),
+      action, dc (ou site)
+    Sans IP publique : origine "Interne", sans arc sur la carte. Ajoutez "Interne" a
+    origins.masked_labels dans la configuration. ```
+| spath
+``` Splunk extrait deja les champs d'un evenement JSON recu par le HEC : spath les double.
+    On retire les doublons. ```
+| foreach * [ eval "<<FIELD>>" = mvdedup('<<FIELD>>') ]
+| eval src_ip = coalesce(src_ip, src),
+       signature = coalesce(signature, name, title),
+       dest_host = coalesce(dest_host, dest, target),
+       dc = coalesce(dc, site)
+| where isnotnull(signature) AND signature != ""
+| eval interne = if(isnull(src_ip) OR cidrmatch("10.0.0.0/8", src_ip) OR cidrmatch("172.16.0.0/12", src_ip)
+                    OR cidrmatch("192.168.0.0/16", src_ip) OR cidrmatch("127.0.0.0/8", src_ip), 1, 0)
+| eval src_ip = coalesce(src_ip, "0.0.0.0"),
+       Country = if(interne == 1, "Interne", Country),
+       src_lat = if(interne == 1, "", src_lat),
+       src_lon = if(interne == 1, "", src_lon)
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action

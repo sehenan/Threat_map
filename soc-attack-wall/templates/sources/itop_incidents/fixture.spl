@@ -1,0 +1,8 @@
+| makeresults count=4
+| streamstats count as i
+| eval _time = now() - 300 + i,
+       _raw = case(
+         i == 1, "{\"ref\":\"I-000101\",\"finalclass\":\"Incident\",\"title\":\"Messagerie indisponible\",\"priority\":\"1\",\"status\":\"new\",\"service_name\":\"Messagerie\",\"org_name\":\"Siege\"}",
+         i == 2, "{\"ref\":\"I-000102\",\"finalclass\":\"Incident\",\"title\":\"Poste infecte\",\"priority\":\"2\",\"status\":\"new\",\"service_name\":\"Securite\",\"org_name\":\"Agence Nord\"}",
+         i == 3, "{\"ref\":\"R-000050\",\"finalclass\":\"UserRequest\",\"title\":\"Nouveau compte\",\"priority\":\"4\",\"status\":\"new\",\"service_name\":\"Comptes\",\"org_name\":\"Siege\"}",
+         true(), "{\"ref\":\"I-000101\",\"finalclass\":\"Incident\",\"title\":\"Messagerie indisponible\",\"priority\":\"1\",\"status\":\"assigned\",\"service_name\":\"Messagerie\",\"org_name\":\"Siege\"}")

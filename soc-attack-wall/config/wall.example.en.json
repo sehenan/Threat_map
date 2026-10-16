@@ -1,0 +1,110 @@
+{
+  "_lisez_moi": "Wall configuration (English interface). Copy this file to config/wall.json (ignored by git) and adapt it. See README.en.md.",
+  "language": "en",
+  "app": {
+    "id": "soc_attack_wall",
+    "label": "SOC Attack Wall",
+    "version": "1.3.0",
+    "author": "SOC",
+    "roles_write": [
+      "admin",
+      "sc_admin"
+    ],
+    "roles_config": [
+      "*"
+    ],
+    "check_for_updates": true
+  },
+  "page": {
+    "title": "SOC",
+    "subtitle": "Attack Wall",
+    "logo": null,
+    "accent": "#7fbc2a",
+    "map_home": {
+      "lon": 6,
+      "lat": 25,
+      "zoom": 1.5
+    }
+  },
+  "sites": [
+    {
+      "id": "DC-NORD",
+      "label": "DC North",
+      "lat": 50.6292,
+      "lon": 3.0573,
+      "label_dir": [
+        -1,
+        -1.1
+      ]
+    },
+    {
+      "id": "DC-SUD",
+      "label": "DC South",
+      "lat": 43.2965,
+      "lon": 5.3698,
+      "label_dir": [
+        1,
+        1.2
+      ]
+    },
+    {
+      "id": "CLOUD",
+      "label": "Cloud",
+      "lat": 50.1109,
+      "lon": 8.6821,
+      "label_dir": [
+        1,
+        -1.1
+      ]
+    }
+  ],
+  "default_site": "DC-NORD",
+  "sources": [
+    {
+      "id": "waf",
+      "label": "WAF",
+      "color": "#00a7eb",
+      "search_file": "sources/demo/waf.spl",
+      "demo_weight": 55
+    },
+    {
+      "id": "ids",
+      "label": "IDS",
+      "color": "#7770d5",
+      "search_file": "sources/demo/ids.spl",
+      "demo_weight": 3,
+      "priority": true
+    },
+    {
+      "id": "mail",
+      "label": "Email",
+      "color": "#00b891",
+      "search_file": "sources/demo/mail.spl",
+      "demo_weight": 20
+    },
+    {
+      "id": "idp",
+      "label": "Identity",
+      "color": "#d0b8ff",
+      "search_file": "sources/demo/idp.spl",
+      "demo_weight": 12
+    },
+    {
+      "id": "vpn",
+      "label": "VPN",
+      "color": "#83e3c9",
+      "search_file": "sources/demo/vpn.spl",
+      "demo_weight": 10,
+      "lookback_minutes": 0
+    }
+  ],
+  "origins": {
+    "exclude_countries": [],
+    "ranking_exclude_countries": [],
+    "masked_labels": [
+      "Masked origin"
+    ]
+  },
+  "burst_cap": 20,
+  "summary_index": "summary"
+}

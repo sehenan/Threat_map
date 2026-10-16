@@ -1,0 +1,6 @@
+{ "lignes": 3,
+  "valeurs": { "signature": ["Zabbix agent is not available", "High CPU utilization", "Interface down"],
+               "severity": ["critical", "medium", "informational"], "action": ["alerted"],
+               "Country": ["Interne"],
+               "dest_host": ["srv-db-01.example.org", "srv-web-01.example.org", "sw-core-01"], "dc": ["DC-NORD"] },
+  "_note": "ligne 3 ecartee (value 0 : retour a la normale)" }

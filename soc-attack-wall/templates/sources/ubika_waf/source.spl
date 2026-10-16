@@ -1,0 +1,22 @@
+search index=waf sourcetype=ubika "ICX Engine" src=* app=*
+``` Template: Ubika WAF (WAAP / ICX Engine). ```
+``` Modele : WAF Ubika (WAAP / ICX Engine). A ADAPTER : index, sourcetype.
+    Exclure vos scanners autorises, par exemple :
+      NOT [| inputlookup scanners_autorises.csv | fields src] ```
+| spath input=json_log
+| search events{}.tokens.attackFamily!="No Attack Family"
+| eval signature = mvindex('events{}.tokens.attackFamily', 0)
+``` gravite : selon le volume de la rafale (meme famille, meme appli, meme source) ```
+| eventstats count as rafale by signature, app, src_ip
+| eval severity = case(rafale > 250, "critical", rafale > 60, "high", true(), "medium")
+``` site : applications internes (IP privee) ou exposees dans le cloud. A ADAPTER a vos ids de sites ```
+| eval dc = if(cidrmatch("10.0.0.0/8", dest_ip) OR cidrmatch("172.16.0.0/12", dest_ip)
+               OR cidrmatch("192.168.0.0/16", dest_ip), "DC-NORD", "CLOUD")
+``` origine masquee : trafic relaye par un proxy ou un CDN, dont l'IP n'est pas celle
+    de l'attaquant. A ADAPTER (plages de votre fournisseur) ou supprimer ```
+| eval masque = if(cidrmatch("198.18.0.0/15", src_ip), 1, 0)
+| eval Country = if(masque == 1, "Origine masquée", Country),
+       src_lat = if(masque == 1, "", src_lat),
+       src_lon = if(masque == 1, "", src_lon)
+| eval dest_host = replace(app, "-\d+(\s*#\d+)?$", ""), action = "blocked"
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action

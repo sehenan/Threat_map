@@ -1,0 +1,18 @@
+search index=vpn sourcetype=f5:bigip:apm:syslog
+``` Template: F5 BIG-IP APM VPN denials (Splunk Add-on for F5 BIG-IP). ```
+``` Modele : refus de connexion VPN F5 BIG-IP APM (Splunk Add-on for F5 BIG-IP).
+    L'IP du client et le refus sont sur deux lignes differentes d'une meme session :
+    la recherche regarde 10 min plus tot (lookback_minutes: 10 dans la config) pour
+    retrouver l'ouverture de session, puis ne garde que les refus du lot ($WINDOW_START$). ```
+| rex field=_raw ":Common:(?<sess>[0-9a-f]+):"
+| rex field=_raw "New session from client IP (?<cip>\S+) \("
+| rex field=_raw "/Common/Workflow[_-]?(?<portail>[^:]+):"
+| eventstats values(cip) as cip, values(portail) as portail by sess
+| search "Logon_Deny"
+| eval src_ip = mvindex(cip, 0)
+| where isnotnull(src_ip) AND _time >= $WINDOW_START$
+| eventstats count as rafale by src_ip
+| eval severity = case(rafale > 5, "critical", rafale > 2, "high", true(), "medium")
+| eval signature = "Refus VPN", dest_host = mvindex(portail, 0), action = "blocked",
+       dc = "DC-NORD"
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action

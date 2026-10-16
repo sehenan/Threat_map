@@ -1,0 +1,32 @@
+# Splunk Enterprise local, avec l'appli et les entrees de donnees installees au demarrage.
+# 1. python build.py ; python docker/paquet.py   -> dist/*.tgz
+# 2. renseignez .env (voir .env.example)
+# 3. docker compose up -d       -> http://localhost:8000 (admin / votre mot de passe)
+# Brancher les sources : docs/INTEGRATIONS.md
+services:
+  splunk:
+    image: splunk/splunk:latest
+    container_name: soc-attack-wall-splunk
+    environment:
+      SPLUNK_START_ARGS: ${SPLUNK_START_ARGS:?acceptez la licence Splunk dans .env}
+      SPLUNK_GENERAL_TERMS: ${SPLUNK_GENERAL_TERMS:?acceptez les conditions generales Splunk dans .env}
+      SPLUNK_PASSWORD: ${SPLUNK_PASSWORD:?definissez SPLUNK_PASSWORD dans .env}
+      SPLUNK_HEC_TOKEN: ${SPLUNK_HEC_TOKEN:?definissez SPLUNK_HEC_TOKEN dans .env}
+      SPLUNK_APPS_URL: /dist/soc_attack_wall-${WALL_VERSION:-1.5.2}.tgz,/dist/threatmap_inputs.tgz
+      TZ: ${TZ:-Africa/Abidjan}
+    ports:
+      - "8000:8000"       # interface web
+      - "8089:8089"       # API REST (tests/splunk/run.py)
+      - "8088:8088"       # HTTP Event Collector : Zabbix, iTop, UTMStack, JSON generique
+      - "5514:5514/udp"   # syslog BunkerWeb
+      - "5514:5514/tcp"
+      - "5515:5515/udp"   # syslog FortiWeb
+      - "5515:5515/tcp"
+    volumes:
+      - ./dist:/dist:ro
+      - splunk-var:/opt/splunk/var
+      - splunk-etc:/opt/splunk/etc
+
+volumes:
+  splunk-var:
+  splunk-etc:

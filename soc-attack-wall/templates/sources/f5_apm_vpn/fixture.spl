@@ -1,0 +1,7 @@
+| makeresults count=2
+| streamstats count as i
+| eval _time = now() - 300 + i,
+       Country = "Vietnam", src_lat = 14.05, src_lon = 108.27,
+       _raw = if(i == 1,
+         "apd[4242]: 01490000:5: /Common/vpn_ap:Common:abc12345: New session from client IP 203.0.113.50 (ST=/CC=/C=) at VIP 192.0.2.1",
+         "apd[4242]: 01490102:5: /Common/Workflow_Portail:Common:abc12345: Access policy result: Logon_Deny")

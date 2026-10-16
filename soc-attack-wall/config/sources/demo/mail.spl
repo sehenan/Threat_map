@@ -1,0 +1,24 @@
+| makeresults count=160
+``` Source de DEMONSTRATION : aucun index requis. Genere des evenements realistes
+    sur la fenetre de la recherche planifiee (addinfo), avec des heures creuses,
+    des pics et des rafales. IP : plages reservees a la documentation (RFC 5737). ```
+| addinfo
+| eval debut = if(info_min_time > 0, info_min_time, relative_time(now(), "-7m@m"))
+| eval _time = debut + (random() % 300000) / 1000
+``` volume : creux la nuit, un pic toutes les ~85 min ```
+| eval h = tonumber(strftime(_time, "%H")),
+       jour = 0.25 + 0.75 * abs(sin((h - 3) * pi() / 20)),
+       pic = if(floor(debut / 300) % 17 == 0, 1, 0),
+       garde = if(pic == 1, 100, round(40 * jour))
+| where random() % 100 < garde
+``` origine : 100 lignes ponderees par pays ; peu d'adresses par pays -> rafales ```
+| eval k = random() % 100
+| lookup wall_demo_origins k OUTPUT Country, src_lat, src_lon, net, base
+| eval src_ip = net . "." . (base + random() % 12)
+| eval source = "mail", s = if(pic == 1, 0, random() % 6)
+| lookup wall_demo_signatures source, s OUTPUT signature, severity
+| eval r = random() % 100
+| eval dc = "CLOUD",
+       dest_host = mvindex(split("example.org,filiale.example.org", ","), random() % 2),
+       action = "blocked"
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action

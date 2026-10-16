@@ -1,0 +1,43 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Tests hors ligne
+        run: python -W error::ResourceWarning -m unittest discover -s tests -v
+      - name: Configuration d'exemple
+        run: python build.py --verifier
+      - name: Paquet
+        run: python build.py
+      - name: Version anglaise
+        run: python build.py --config config/wall.example.en.json --sortie en
+      - name: AppInspect (Splunk Cloud)
+        run: |
+          pip install splunk-appinspect
+          splunk-appinspect inspect dist/*.tgz --mode precert --included-tags cloud --included-tags private_app \
+            --output-file appinspect.json --data-format json
+          python - <<'PY'
+          import json, sys
+          r = json.load(open("appinspect.json"))
+          s = r["summary"]
+          print(s)
+          sys.exit(1 if s.get("error", 0) or s.get("failure", 0) else 0)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: appli
+          path: |
+            dist/*.tgz
+            dist/apercu.html

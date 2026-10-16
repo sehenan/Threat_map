@@ -1,0 +1,5 @@
+| makeresults count=4
+| streamstats count as i
+| eval _time = now() - 300 + i,
+       src = "198.51.100.14", Country = "Netherlands", src_lat = 52.13, src_lon = 5.29, dest = "example.org",
+       signature = case(i == 1, "inbound_phish", i == 2, "spam_definite", i == 3, "bulk", true(), "")

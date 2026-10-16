@@ -1,0 +1,160 @@
+/* Tableau de bord "configuration" du mur.
+   Memes jetons que le mur (web/index.html). Tout est prefixe par #cf : Splunk
+   Web embarque Bootstrap 2 (.row, .btn, select, h1-h3...) et ses propres
+   styles de tableau de bord. */
+:root{
+  --nuit:#0a1621; --surface:#0f1e2b; --surface-2:#132536; --trait:#1d3041;
+  --encre:#d6e1ea; --encre-2:#93a7b8; --encre-3:#5f7487; --accent:#7fbc2a;
+  --ok:#7fbc2a; --att:#f0b429; --err:#e8455a; --info:#5aa2e0;
+  --f:'Barlow Semi Condensed',system-ui,sans-serif;
+}
+body,.dashboard-body,.main-section-body{background:var(--nuit)!important}
+.dashboard-body{padding:0!important}
+#cf{font-family:var(--f);color:var(--encre);background:var(--nuit);font-size:15px;line-height:1.45;
+  padding:22px 28px 60px;min-height:100vh;box-sizing:border-box;max-width:1500px;margin:0 auto}
+#cf *{box-sizing:border-box}
+#cf h1,#cf h2,#cf h3,#cf p,#cf ol,#cf ul{margin:0;padding:0;line-height:1.25;font-weight:600;color:inherit;font-family:inherit}
+#cf p{font-weight:400}
+#cf ol,#cf ul{list-style:none}
+#cf a{color:var(--info);text-decoration:none}
+#cf a:hover{text-decoration:underline}
+#cf .dis{color:var(--encre-3)}
+#cf .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+
+/* ---- en-tete et navigation ---- */
+#cf .cf-tete{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  padding-bottom:16px;border-bottom:1px solid var(--trait);margin-bottom:8px}
+#cf h1{font-size:30px;letter-spacing:.2px}
+#cf h1 span{color:var(--encre-2);font-weight:500}
+#cf .cf-sous{color:var(--encre-2);margin-top:4px}
+#cf .cf-sous b{color:var(--encre);font-weight:600}
+#cf .cf-nav{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+#cf .cf-nav a{color:var(--encre-2);padding:6px 10px;border-radius:3px}
+#cf .cf-nav a:hover{color:var(--encre);background:var(--surface);text-decoration:none}
+
+/* ---- blocs ---- */
+#cf .cf-bloc{margin-top:26px;scroll-margin-top:20px}
+#cf .cf-bloc-t{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+#cf .cf-bloc-t > div{flex:1;min-width:260px}
+#cf h2{font-size:22px}
+#cf .cf-bloc-t p{color:var(--encre-2);margin-top:3px;max-width:900px}
+#cf .cf-carte{background:var(--surface);border:1px solid var(--trait);border-radius:4px}
+
+/* ---- boutons et champs ---- */
+#cf button,#cf .cf-btn{font-family:var(--f);font-size:14px;font-weight:600;height:32px;padding:0 14px;border-radius:3px;
+  border:1px solid var(--trait);background:var(--surface-2);color:var(--encre);cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-shadow:none;box-shadow:none;line-height:1}
+#cf button:hover,#cf .cf-btn:hover{border-color:var(--encre-3);text-decoration:none}
+#cf button.prim,#cf .cf-btn.prim{background:var(--accent);border-color:var(--accent);color:#0a1621}
+#cf button.prim:hover{filter:brightness(1.08)}
+#cf button.dang{color:var(--err)}
+#cf button.dang:hover{border-color:var(--err)}
+#cf button.petit{height:26px;padding:0 9px;font-size:13px}
+#cf button:disabled{opacity:.45;cursor:default;border-color:var(--trait)}
+#cf button:focus-visible,#cf select:focus-visible,#cf input:focus-visible,#cf textarea:focus-visible,#cf a:focus-visible{
+  outline:2px solid var(--info);outline-offset:1px}
+#cf input[type=text],#cf select,#cf textarea{font-family:var(--f);font-size:14px;color:var(--encre);background:var(--nuit);
+  border:1px solid var(--trait);border-radius:3px;height:32px;padding:0 9px;margin:0;box-shadow:none;width:auto}
+#cf select{padding-right:4px}
+#cf textarea{height:120px;padding:8px 9px;width:100%;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+#cf input[type=file]{display:none}
+#cf label{display:inline;margin:0;font-size:inherit;color:inherit}
+
+/* ---- etats ---- */
+#cf .e{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;white-space:nowrap}
+#cf .e::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor;flex:none}
+#cf .e-ok{color:var(--ok)} #cf .e-att{color:var(--att)} #cf .e-err{color:var(--err)}
+#cf .e-info{color:var(--info)} #cf .e-run{color:var(--encre-3)}
+#cf .e-run::before{animation:cfpulse 1s ease-in-out infinite alternate}
+@keyframes cfpulse{from{opacity:.25}to{opacity:1}}
+
+/* ---- demarrage ---- */
+#cf .cf-resume{display:flex;gap:18px;color:var(--encre-2);font-size:14px}
+#cf .cf-resume b{color:var(--encre);font-size:18px;margin-right:3px}
+#cf .cf-checks li{display:grid;grid-template-columns:110px 1fr auto;gap:14px;align-items:center;
+  padding:11px 16px;border-top:1px solid var(--trait)}
+#cf .cf-checks li:first-child{border-top:0}
+#cf .cf-checks b{font-weight:600}
+#cf .cf-checks .det{color:var(--encre-2);font-size:14px;margin-top:2px;overflow-wrap:anywhere}
+#cf .cf-checks .act{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+
+/* ---- analystes ---- */
+#cf .cf-analystes{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+#cf .cf-av{padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+#cf .cf-av .ph{width:96px;height:96px;border-radius:50%;object-fit:cover;background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;color:var(--encre-2);border:2px solid var(--trait)}
+#cf .cf-av .nom{font-size:18px;font-weight:600}
+#cf .cf-av .cle{color:var(--encre-3);font-size:13px}
+#cf .cf-av .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:2px}
+#cf .cf-ajout{padding:14px;display:flex;flex-direction:column;gap:9px;justify-content:center;border-style:dashed}
+#cf .cf-ajout input[type=text]{width:100%}
+#cf .cf-ajout .apercu{display:flex;align-items:center;gap:10px;color:var(--encre-2);font-size:13px}
+#cf .cf-ajout .apercu img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+
+/* ---- planning ---- */
+#cf .cf-outils{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#cf .cf-outils .sep{flex:1}
+#cf .cf-plan{width:100%;border-collapse:collapse;margin-top:10px}
+#cf .cf-plan th{text-align:left;font-weight:600;color:var(--encre-2);font-size:13px;padding:8px 12px;border-bottom:1px solid var(--trait)}
+#cf .cf-plan td{padding:6px 12px;border-top:1px solid var(--trait)}
+#cf .cf-plan tr.we td{background:rgba(255,255,255,.015)}
+#cf .cf-plan tr.auj td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+#cf .cf-plan tr.auj .jr b{color:var(--accent)}
+#cf .cf-plan tr.modif td{background:rgba(90,162,224,.08)}
+#cf .cf-plan .jr{white-space:nowrap}
+#cf .cf-plan .jr span{color:var(--encre-3);margin-left:6px}
+#cf .cf-plan select{min-width:150px}
+#cf .cf-plan select.inconnu{border-color:var(--att)}
+#cf .cf-import{margin-top:12px;padding:14px;display:none}
+#cf .cf-import.ouvert{display:block}
+#cf .cf-import p{color:var(--encre-2);font-size:14px;margin-bottom:8px}
+#cf .cf-import .cf-outils{margin-top:8px}
+
+/* ---- tableaux ---- */
+#cf .cf-tab{width:100%;border-collapse:collapse;font-size:14px}
+#cf .cf-tab th{text-align:left;font-weight:600;color:var(--encre-2);font-size:13px;padding:9px 12px;border-bottom:1px solid var(--trait);white-space:nowrap}
+#cf .cf-tab td{padding:9px 12px;border-top:1px solid var(--trait);vertical-align:top}
+#cf .cf-tab td.num,#cf .cf-tab th.num{text-align:right;font-variant-numeric:tabular-nums}
+#cf .cf-tab .sous{color:var(--encre-3);font-size:12.5px}
+#cf .cf-tab tr.test td{background:var(--surface-2);color:var(--encre-2);font-size:13.5px}
+#cf .cf-tab .vide td{color:var(--encre-3);text-align:center;padding:18px}
+#cf .cf-defil{overflow-x:auto}
+#cf .cf-note{padding:10px 16px;color:var(--encre-2);font-size:14px;border-top:1px solid var(--trait)}
+#cf .cf-note:empty{display:none}
+
+/* ---- depannage ---- */
+#cf .cf-grille2{display:grid;grid-template-columns:1fr;gap:14px}
+#cf .cf-carte-t{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--trait)}
+#cf .cf-carte-t h3{font-size:17px;flex:1}
+#cf .cf-conseil{color:var(--encre-2);font-size:13px;margin-top:3px}
+
+/* ---- messages ---- */
+#cf .cf-toast{position:fixed;right:24px;bottom:24px;max-width:460px;padding:12px 16px;border-radius:4px;z-index:3000;
+  background:var(--surface-2);border:1px solid var(--trait);box-shadow:0 8px 30px rgba(0,0,0,.45);font-size:14px;
+  opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none}
+#cf .cf-toast.vu{opacity:1;transform:none}
+#cf .cf-toast.err{border-color:var(--err)}
+#cf .cf-toast.ok{border-color:var(--ok)}
+#cf .cf-alerte{padding:12px 16px;border-left:3px solid var(--att);background:var(--surface);color:var(--encre-2);margin-bottom:12px;font-size:14px}
+#cf .cf-alerte.err{border-left-color:var(--err)}
+#cf .cf-alerte b{color:var(--encre)}
+
+@media (max-width:900px){
+  #cf{padding:16px}
+  #cf .cf-checks li{grid-template-columns:1fr;gap:6px}
+  #cf .cf-checks .act{justify-content:flex-start}
+}
+
+/* ---- sources ---- */
+#cf .cf-sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:8px;vertical-align:1px}
+#cf .cf-form{display:none;padding:16px;margin-bottom:12px}
+#cf .cf-form.ouvert{display:block}
+#cf .cf-form h3{font-size:17px;margin-bottom:12px}
+#cf .cf-champs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:12px}
+#cf .cf-champs label,#cf .cf-form label.bloc{display:flex;flex-direction:column;gap:5px;color:var(--encre-2);font-size:13px}
+#cf .cf-champs label.coche{flex-direction:row;align-items:center;gap:8px;align-self:end;height:32px}
+#cf .cf-champs input[type=text],#cf .cf-champs select{width:100%}
+#cf input[type=color]{width:64px;height:32px;padding:2px;border:1px solid var(--trait);background:var(--nuit);border-radius:3px}
+#cf .cf-form textarea{height:220px}
+#cf .cf-form .cf-conseil{margin:8px 0}
+#cf #f-res{margin:8px 0;font-size:14px}

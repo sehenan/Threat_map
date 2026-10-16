@@ -1,0 +1,4 @@
+{ "lignes": 2,
+  "valeurs": { "signature": ["Messagerie", "Securite"], "severity": ["critical", "high"], "action": ["alerted"],
+               "Country": ["Interne"], "dest_host": ["Siege", "Agence Nord"], "dc": ["DC-NORD"] },
+  "_note": "ligne 3 ecartee (UserRequest) ; ligne 4 : meme ticket que la ligne 1, releve suivant" }

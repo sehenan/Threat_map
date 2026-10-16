@@ -1,0 +1,15 @@
+search index=threatmap (sourcetype=fortiweb OR sourcetype=fwb_attack) type=attack src=*
+``` Template: Fortinet FortiWeb WAF (attack log, Fortinet FortiWeb Add-On for Splunk). ```
+``` Modele : WAF Fortinet FortiWeb (journal d'attaques, Fortinet FortiWeb Add-On for Splunk).
+    A ADAPTER : index, id du site. Sourcetype fwb_attack avec l'add-on, fortiweb en syslog direct. ```
+| eval signature = case(isnotnull(sub_type) AND sub_type != "" AND sub_type != "N/A", sub_type,
+                        isnotnull(main_type) AND main_type != "", main_type,
+                        true(), msg)
+| eval niveau = lower(coalesce(severity_level, severity)),
+       severity = case(niveau == "critical", "critical", niveau == "high", "high", niveau == "medium", "medium",
+                       niveau == "low", "low", true(), "informational")
+| where severity != "informational"
+| eval src_ip = src, dest_host = coalesce(http_host, dst),
+       action = if(match(lower(action), "deny|block|erase|redirect"), "blocked", "alerted"),
+       dc = "DC-NORD"
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action

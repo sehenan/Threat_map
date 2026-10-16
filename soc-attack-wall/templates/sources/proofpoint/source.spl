@@ -1,0 +1,10 @@
+search index=mail final_action=discard "filter.routeDirection"=inbound signature=*
+``` Template: Proofpoint (rejected inbound messages). ```
+``` Modele : Proofpoint (messages entrants rejetes). A ADAPTER : index, champs selon votre add-on. ```
+| where signature != ""
+| eval severity = case(match(signature, "phish|impostor|malware"), "critical",
+                       match(signature, "definite|blocked"),        "high",
+                       true(),                                      "medium")
+| eval src_ip = src, dest_host = dest, action = "blocked",
+       dc = "CLOUD"
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action

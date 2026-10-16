@@ -1,0 +1,6 @@
+{ "lignes": 4,
+  "valeurs": { "signature": ["SQL Injection", "Inbound Anomaly Score Exceeded", "Cross-Site Scripting", "Local File Inclusion"],
+               "severity": ["high", "medium", "critical"], "action": ["blocked", "detect"],
+               "src_ip": ["203.0.113.7", "203.0.113.8", "203.0.113.9", "203.0.113.10"],
+               "dest_host": ["www.example.org"], "dc": ["DC-NORD"] },
+  "_note": "lignes 1-2 : regle SQLi puis refus, score 10 (CRS 3) ; ligne 3 : refus seul, score 5 ; ligne 4 : regle XSS sans refus (mode detection) ; lignes 5-8 : format CRS 4, trois regles (lfi majoritaire) puis refus sans message, score 30" }

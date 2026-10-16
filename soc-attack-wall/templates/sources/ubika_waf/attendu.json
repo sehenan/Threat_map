@@ -1,0 +1,4 @@
+{ "lignes": 3,
+  "valeurs": { "dc": ["CLOUD", "DC-NORD"], "signature": ["SQL Injection"], "dest_host": ["portail"],
+               "Country": ["Russia", "Origine masquée"], "severity": ["medium"], "action": ["blocked"] },
+  "_note": "ligne 4 ecartee (No Attack Family) ; ligne 3 masquee (plage 198.18.0.0/15) ; appli internes -> DC-NORD" }

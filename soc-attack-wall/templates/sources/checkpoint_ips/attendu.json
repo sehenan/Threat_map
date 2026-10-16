@@ -1,0 +1,4 @@
+{ "lignes": 2,
+  "valeurs": { "signature": ["Apache Struts RCE", "Port scan"], "severity": ["critical", "medium"],
+               "action": ["detect"], "dc": ["DC-NORD"], "dest_host": ["srv-web-01"] },
+  "_note": "ligne informational ecartee ; CVE retire de la signature ; Low compte en medium" }

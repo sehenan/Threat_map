@@ -1,0 +1,28 @@
+search index=threatmap sourcetype="itop:ticket"
+``` Template: iTop incidents (tickets exported as JSON). ```
+``` Modele : incidents iTop (tickets exportes en JSON).
+    A ADAPTER : index, sourcetype, id du site. iTop n'a pas d'add-on Splunk : les tickets
+    sont a exporter vers Splunk (API REST core/get, ou base de donnees). Champs lus,
+    ceux de l'API REST : ref, finalclass, priority (1 a 4), service_name, title, org_name.
+    Un ticket peut etre exporte a chaque releve : il n'est compte qu'a sa premiere
+    apparition. Mettez lookback_minutes: 15 sur la source (plus que l'intervalle entre
+    deux releves) ; $WINDOW_START$ ne garde que les tickets apparus dans le lot.
+    Ce ne sont pas des attaques : pas d'origine, donc pas d'arc sur la carte. Ajoutez
+    "Interne" a origins.masked_labels dans la configuration. ```
+| spath
+``` Splunk extrait deja les champs d'un evenement JSON recu par le HEC : spath les double.
+    On retire les doublons. ```
+| foreach * [ eval "<<FIELD>>" = mvdedup('<<FIELD>>') ]
+| where finalclass == "Incident"
+| eventstats min(_time) as vu by ref
+| where vu >= $WINDOW_START$
+| dedup ref
+| eval _time = vu,
+       niveau = tonumber(priority),
+       signature = coalesce(service_name, title, "Incident"),
+       dest_host = org_name
+| eval severity = case(niveau == 1, "critical", niveau == 2, "high", niveau == 3, "medium", true(), "low")
+| eval src_ip = "0.0.0.0", Country = "Interne", src_lat = "", src_lon = "",
+       action = "alerted",
+       dc = "DC-NORD"
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action

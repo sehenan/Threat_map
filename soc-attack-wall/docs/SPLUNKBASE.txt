@@ -1,0 +1,443 @@
+SOC ATTACK WALL - FICHE SPLUNKBASE
+==================================
+
+Textes a copier dans les champs de la fiche Splunkbase (en anglais).
+Le resume (Summary) est en Markdown.
+
+
+TITLE
+-----
+SOC Attack Wall
+
+
+SHORT DESCRIPTION
+-----------------
+Live attack map, daily counters, live feed and replay for SOC wall screens, built on your own Splunk data.
+
+
+APP ID / VERSION
+----------------
+soc_attack_wall
+1.2.1
+
+
+PACKAGE TO UPLOAD
+-----------------
+dist/release-1.2.1/soc_attack_wall-1.2.1-en.tgz   (English interface)
+Icon (512 x 512): dist/release-1.2.1/icon-512.png
+
+
+SOURCE CODE
+-----------
+https://github.com/soc-ops-cyber/soc-attack-wall   (MIT licence)
+
+
+SUMMARY (Markdown)
+------------------
+
+## Turn your Splunk data into a live attack wall for your SOC
+
+**SOC Attack Wall** shows the attacks hitting your organisation as they happen, on a world map. It is designed for the large screens of a security operations centre, and it runs entirely inside Splunk.
+
+### The problem it solves
+
+Most SOCs keep a wall of screens for situational awareness. In practice those screens show either:
+- raw dashboards: dense tables and charts that nobody can read from across the room; or
+- a vendor "threat map" fed by someone else's data, with nothing to do with what your own defences are blocking.
+
+Building a wall from your own data usually means an external web page, a server to maintain, and a Splunk token stored somewhere. The page also tends to rerun heavy searches for every open screen. It then stays frozen or empty whenever something breaks, and nobody notices.
+
+SOC Attack Wall gives you a readable, always-on view of **your** attacks, built on **your** Splunk data, with no external server and no stored credentials.
+
+### What it shows
+
+- **Live map.** Attacks of the last 5 minutes are drawn as arcs from the attacker's country to the site they target (datacenter, cloud, mail gateway…). Arcs are coloured by severity and labelled by country.
+- **Today's counters.** Attacks since midnight, blocked attacks, source countries, critical and high alerts, and the severity split.
+- **Rankings.** Top source countries, top attack techniques, and volume per source (WAF, IPS, email, identity, VPN…).
+- **Live feed.** The latest events with time, source, severity, source IP (with a reputation link), country, technique, target and action. Bursts are grouped, and rare but important sources are pinned at the top.
+- **Replay.** Click any point on today's curve to replay that 5-minute slice on the map and in the feed, at ×5 speed. Step backward and forward, then return to live. Useful for reviewing a spike, or for showing an incident to someone who just walked in.
+- **On-duty team.** Photos and names of today's analysts and of the person on call.
+- **Screen layouts.** One horizontal screen, or two stacked screens. The layout adapts automatically.
+
+### How it works
+
+- **Scheduled searches.** One scheduled search per attack source runs every 5 minutes and copies its results to the summary index. Summary indexing does not count against your licence.
+- **Shared by every screen.** The dashboard reads the latest results and never reruns the searches: ten open screens cost the same as one.
+- **Today's total** is computed from the summary index in a few seconds, without rereading a whole day of raw logs.
+- **Robust by design.** Searches cover contiguous, non-overlapping windows. A control row dates each batch. If the app runs on several search heads, duplicate results are removed.
+
+### Getting started
+
+- **It works out of the box.** The app ships with five **demo sources** that generate realistic traffic with `makeresults`, so the wall comes alive right after installation, with no data required.
+- **A configuration dashboard** guides you through setup. It includes:
+  - **post-install checks**: scheduled searches, summary index, data freshness for each source, and whether the wall can read its data;
+  - **attack sources**: add a source from a template or from your own SPL, validate it against your data before saving, then edit, disable or delete it, all without rebuilding the app;
+  - **analysts and schedule**: photos, and a two-week duty roster that you can paste straight from Excel;
+  - **search status and troubleshooting**: last runs, durations, skipped runs, and Splunk errors related to the app, with explanations for known issues.
+- **Source templates** are included for common products: Ubika WAF, Check Point IPS, Proofpoint, Microsoft 365 / Entra ID sign-in failures, and F5 BIG-IP APM VPN denials.
+- **A simple contract.** A source only needs to return `_time, src_ip, dc, severity, signature, dest_host, action`. Geolocation, site coordinates and normalisation are added automatically.
+
+### Requirements
+
+- Splunk Enterprise 8.1+ or Splunk Cloud Platform.
+- The display account needs a role that can search the summary index.
+- The interface is available in English and French.
+
+### Open source
+
+The project is published under the MIT licence at **https://github.com/soc-ops-cyber/soc-attack-wall**. The repository includes:
+- the build tooling, to generate a version of the app with your own sites, sources, branding and language;
+- offline tests, and SPL test sets that you can run against your own Splunk.
+
+
+DETAILS (Markdown)
+------------------
+
+## Installation
+
+1. Install the app: *Apps > Manage Apps > Install app from file* (Splunk Enterprise), or through your Splunk Cloud admin. The package passes Splunk AppInspect for Splunk Cloud.
+2. The app opens on its **Configuration** page. Keep it open: its *Getting started* section checks everything the wall needs.
+3. Wait about 10 minutes, the time for two runs of the scheduled searches, then click **Open the wall**.
+
+The app works immediately with its five **demo sources**, which generate realistic, fictitious traffic with `makeresults`. They need no index. Replace them with your own sources when you are ready (see *Adding your attack sources* below).
+
+**Several search heads**: install the app on the search head that will display the wall. If it is also installed elsewhere, disable its scheduled searches there (*Scheduled searches* section of the configuration page). Counters stay correct either way, but the work would run twice.
+
+## First run: the Getting started checks
+
+Each line of *Getting started* shows **OK**, **Check** or **Error**, with the action to take:
+
+| Check | What it verifies |
+|---|---|
+| App and search head | installed version, and whether your browser loaded the current one |
+| Analysts / Schedule | the team shown in the wall header. Use *Create 3 sample analysts* and *Create a sample schedule* to start |
+| Scheduled searches | the searches exist, are enabled, and run every 5 minutes without shifting |
+| Summary index | every source wrote to the summary in the last 20 minutes, from which search head, and without duplicates |
+| Read by the wall | the daily total is available to the wall |
+| Data <source> | each source received events in the last 15 minutes |
+
+Click *Run the checks again* at any time.
+
+## Displaying the wall
+
+Open the wall at its direct address on the display screen:
+
+```
+https://<your-splunk>/app/soc_attack_wall/wall
+```
+
+The app address alone opens the configuration page.
+
+- **Display account**: a basic `user` role is enough, provided it can **search the summary index**. The wall never reruns the scheduled searches: it only reads their latest results.
+- **Time zone**: give this account the same time zone as the room. The hourly and 5-minute slices of the daily curve use the Splunk user's time zone.
+- **Refresh**: no need to reload the page, it updates by itself every minute. Reloading every 30 minutes is still a sensible habit for a screen that runs day and night.
+- **Keyboard and mouse**:
+  - `F`: full screen;
+  - `R`: recentre the map;
+  - mouse wheel and drag: zoom and pan the map. The + / − / □ buttons do the same.
+- **Layout**:
+  - **one horizontal screen**, or **two stacked screens** (a column of two 16:9 displays). The vertical layout switches on automatically when the window is taller than wide.
+  - the button at the top right toggles between the two layouts, and the browser remembers the choice.
+  - if the junction between the two screens falls in the wrong place, add `?jointure=980` to the address: it forces the junction position in pixels from the top of the page. `?debug=1` shows a marker.
+
+### Reading the wall
+
+- **Header**: the analysts on duty and on call, the live status, the number of attacks in the last 5 minutes, and the local time.
+- **Today**: attacks since midnight, blocked attacks, source countries, critical or high attacks, and the severity split.
+- **Map**: the attacks of the last 5 minutes. Each arc goes from the attacker's country to the targeted site; its colour gives the severity. Protected sites show their count for the day.
+- **Top countries, Attack techniques, By source**: rankings for the day.
+- **Live feed**: the latest events. Bursts (same source, IP, technique and target) are grouped as "× n". Sources marked as *priority* are pinned at the top for 30 minutes. Click an IP to check its reputation on AbuseIPDB.
+- **Attacks today**: the day's curve, in 5-minute slices.
+
+The wall shows attacks with a delay of about 7 minutes. Each 5-minute batch is replayed at its original pace over the following 5 minutes, so the map moves continuously instead of jumping.
+
+### Replay
+
+1. Hover over the **Attacks today** curve: a tooltip gives the time and number of attacks of each 5-minute slice.
+2. Click a slice to replay it on the map and in the feed, at ×5 speed (5 minutes in 1 minute). Slices follow one another until the replay catches up with live.
+3. Use the buttons in the curve panel: `‹ 5 min`, `Pause`, `5 min ›` and `Back to live`. From the keyboard: arrow keys, space bar and `Esc`.
+
+You can replay any moment of the current day, except the last 10 minutes, which are not yet in the summary index. Counters and the curve keep following live during a replay.
+
+## Adding your attack sources
+
+A source is an SPL search, run every 5 minutes. On the **Attack sources** section of the configuration page (admin roles):
+
+1. Click **Add a source**.
+2. Start from a template (Ubika WAF, Check Point IPS, Proofpoint, Microsoft 365 sign-in failures, F5 APM VPN) or from a blank search.
+3. Adapt the index and the site ids.
+4. Choose an identifier, a label, a colour and, if needed, a look-back delay.
+5. Click **Validate on the last hour**. It checks your search against your data: missing source IPs, unknown sites, invalid severities, empty signatures.
+6. Save. The page creates the scheduled search `wall_<id>`, and the source appears on the wall after its first run (5 to 10 minutes).
+
+Sources can later be **edited**, **disabled** or **deleted** from the same table. Demo sources can be disabled once your own sources run.
+
+### Source contract
+
+Your search must return one event per attack, and end with:
+
+```
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action
+```
+
+| Field | Content |
+|---|---|
+| `_time` | time of the attack |
+| `src_ip` | attacker IP. It is geolocated automatically, and events that cannot be geolocated (private IPs) are dropped |
+| `dc` | id of the targeted site. Unknown ids are attached to the default site |
+| `severity` | `critical`, `high`, `medium`, `low` or `informational`. Any other value counts as `medium` |
+| `signature` | the attack type shown on the wall |
+| `dest_host` | the target shown in the feed (optional) |
+| `action` | `blocked`, `allowed`, `alerted`, `detect`… (optional) |
+
+- **Masked origin**: when the IP you see is a CDN or a proxy rather than the attacker, set `Country` to a masked label and leave `src_lat` and `src_lon` empty. The event is counted, but no arc is drawn.
+- **Logs spread over time**: when the IP and the attack sit on different lines of the same session, set a look-back delay. Then keep only the current batch with `| where _time >= $WINDOW_START$`.
+
+## Team and schedule
+
+- **Analysts**: add a first name and a photo. Photos are cropped to a square automatically and stored in the KV store; nothing is uploaded to the app folder.
+- **Schedule**: a two-week grid, with two analysts on duty and one on call per day. You can paste lines straight from Excel: date, optional day name, on duty 1, on duty 2, on call. The wall reloads the team every 10 minutes and switches automatically at midnight.
+
+## Monitoring and troubleshooting
+
+- **Scheduled searches**: for each search on this search head:
+  - status, schedule, last run, runs and skipped runs over 24 hours, average duration, result count, batches in the summary, next run;
+  - **Validate**: checks the fields a source provides;
+  - **Test**: runs the full search over its window without writing anything;
+  - **Enable / Disable**.
+- **Troubleshooting**: scheduler runs that did not succeed, and Splunk errors and warnings related to the app, over 4 hours, 24 hours or 7 days. Known cases are explained, and each list opens in Search.
+
+Common cases:
+
+| Symptom | Likely cause |
+|---|---|
+| Nothing for 10 minutes after install | no run yet: wait for two runs |
+| Wall empty although the configuration page is green | the display account cannot search the summary index |
+| An added source does not appear | first run not done yet, or the search fails: use *Test* |
+| Counters but no arcs | events without geolocation, or masked origins: use *Validate* |
+| Collection errors right after install | a new KV store collection is loaded at the next search head restart; the wall keeps working meanwhile |
+
+## Data and permissions
+
+- The scheduled searches write to the **summary** index. Summary indexing does not count against your licence.
+- Team, schedule and added sources are stored in the KV store collections `wall_analystes`, `wall_planning` and `wall_sources`.
+- **Permissions**: everyone can read. Only `admin` and `sc_admin` can change the team, the schedule and the sources, because adding a source creates a scheduled search.
+- The app makes no call outside your Splunk. The only exception is the reputation link on an IP, which opens AbuseIPDB in a new tab when a user clicks it.
+
+## Upgrading and uninstalling
+
+- **Upgrade**: install the new package over the old one. Team, schedule and added sources stay in the KV store. Static files carry the version number, so a simple reload of the wall picks up the new version.
+- **Uninstall**: remove the app. Its scheduled searches go with it, and data already copied to the summary index ages out with that index's retention.
+
+## Customising the app
+
+The open-source project (https://github.com/soc-ops-cyber/soc-attack-wall) builds a version of the app with your own settings from a single configuration file:
+- title, logo, colours and language (English or French);
+- protected sites and map view;
+- built-in sources, and countries to exclude or keep out of the rankings.
+
+It also provides offline tests and SPL test sets for the source templates.
+
+
+INSTALLATION (Markdown)
+-----------------------
+
+## Requirements
+
+- **Splunk Enterprise 8.1 or later**, or **Splunk Cloud Platform** (Victoria or Classic experience).
+- **Search head only.** Nothing is needed on indexers or forwarders: the app contains dashboards, scheduled searches, KV store collections and lookups.
+- **An events index for the results**: `summary` by default, present on every Splunk deployment. The scheduled searches copy their results there. Summary indexing does not count against your licence.
+- **Installing** requires an `admin` or `sc_admin` account.
+- **Displaying the wall** only requires a `user` role that can search the summary index.
+- **No external dependency**: the app makes no call outside your Splunk and needs no token or credential.
+
+## Install from Splunkbase
+
+**Splunk Enterprise**
+1. Go to *Apps > Find More Apps*, search for **SOC Attack Wall** and click *Install*.
+2. Alternatively, download the package from Splunkbase and use *Apps > Manage Apps > Install app from file*.
+3. From the command line, run `splunk install app soc_attack_wall-<version>.tgz`, then restart Splunk.
+
+**Splunk Cloud Platform**
+- **Victoria experience**: go to *Apps > Find More Apps*, search for **SOC Attack Wall** and click *Install*.
+- **Classic experience**: request the installation from Splunk Cloud Support, or use the self-service app installation if it is enabled on your stack.
+
+**Search head cluster**
+- Deploy the app from the **deployer**, like any search head app.
+- The scheduled searches run once per cluster.
+- Team, schedule and added sources live in the KV store, which is replicated across the cluster.
+
+**Several standalone search heads**
+- Install the app on the search head that will display the wall.
+- If you also install it elsewhere, disable its scheduled searches there, from the configuration page. Counters stay correct either way, but the work would run twice.
+
+## After installation
+
+1. **Restart if Splunk asks for it.** The app creates KV store collections, and Splunk sometimes loads new collections only at the next restart.
+   - Until then, the *Analysts* and *Schedule* checks show an error.
+   - The wall itself keeps working in the meantime.
+2. **Open the app.** It starts on its **Configuration** page. Read the **Getting started** section: every line shows OK, Check or Error, with the action to take.
+3. **Create a starting team.** Use *Create 3 sample analysts*, then *Create a sample schedule (14 days)*, or enter your own team.
+4. **Wait about 10 minutes**, the time for two runs of the scheduled searches (every 5 minutes). The *Summary index* and *Read by the wall* checks then turn green.
+5. **Open the wall** with the **Open the wall** button, or at its direct address:
+   ```
+   https://<your-splunk>/app/soc_attack_wall/wall
+   ```
+
+The wall works immediately with five **demo sources**. They generate realistic, fictitious traffic with `makeresults` and need no data. Replace them with your own sources from the **Attack sources** section of the configuration page. The *Details* tab explains how.
+
+## Setting up the display screen
+
+- **Use the direct address of the wall.** The app address alone opens the configuration page.
+- **Create a dedicated account** for the screen, with a role that:
+  - can search the summary index;
+  - uses the same **time zone** as the SOC room (the day's curve is split by hour and by 5-minute slice in the user's time zone).
+- **Press `F` for full screen.** For a column of two stacked screens, the vertical layout switches on automatically.
+- **No reload is needed**: the wall updates itself every minute. Reloading every 30 minutes is still a sensible habit for a screen that runs day and night.
+
+## Permissions
+
+| Object | Read | Write |
+|---|---|---|
+| Wall and configuration dashboards | everyone | admin, sc_admin |
+| Team and schedule (`wall_analystes`, `wall_planning`) | everyone | admin, sc_admin |
+| Added sources (`wall_sources`) and scheduled searches | everyone | admin, sc_admin |
+
+Adding a source from the configuration page creates a scheduled search, which requires the right to schedule searches in the app. To let other roles edit the team, add them to the app permissions.
+
+## Upgrading
+
+- **Install the new version over the existing one**, with *Install app from file*, the *Upgrade* option or Splunkbase.
+- **Your data is kept**: team, schedule and added sources stay in the KV store.
+- **No cache to clear**: static files carry the version number, so reloading the wall is enough to load the new version.
+
+## Uninstalling
+
+1. **Remove the app** from *Apps > Manage Apps*. Its scheduled searches and KV store collections go with it.
+2. **Summary data stays**: results already copied to the summary index remain there until that index's normal retention expires them.
+
+## Building a customised version
+
+The open-source project builds a package with your own settings from a single configuration file, with Python 3.8+ and no other dependency:
+- title, logo, colours and language (English or French);
+- protected sites;
+- built-in sources, and countries to exclude or keep out of the rankings;
+- the index used for results.
+
+```
+git clone https://github.com/soc-ops-cyber/soc-attack-wall
+cd soc-attack-wall
+cp config/wall.example.en.json config/wall.json   # edit it
+python3 build.py                                  # -> dist/soc_attack_wall-<version>.tgz
+```
+
+For a private build that is not distributed through Splunkbase, set `"check_for_updates": false` in the configuration.
+
+
+TROUBLESHOOTING (Markdown)
+--------------------------
+
+## Start with the configuration page
+
+Most problems can be diagnosed from the app's **Configuration** page, which opens when you open the app:
+
+- **Getting started** checks each link in the chain: scheduled searches, summary index, data for each source, and reading by the wall. Each line says what to do next.
+- **Scheduled searches** shows, for each search, its last run, its successes and skipped runs over 24 hours, and how many batches reached the summary index.
+  - **Validate** checks the fields a source provides.
+  - **Test** runs the full search over its window without writing anything.
+- **Troubleshooting** lists scheduler runs that did not succeed, and Splunk errors and warnings related to the app, over 4 hours, 24 hours or 7 days. Known cases are explained.
+
+In the browser console of the wall, `__mur.version` gives the loaded version, and `__mur.etat()` shows the wall's internal state: today's total, current batch, arcs.
+
+## The wall stays empty
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Nothing at all in the first 10 minutes | the scheduled searches have not run yet | wait for two runs (every 5 minutes) |
+| *Summary index* check in error | searches disabled, or the summary index is not allowed for the searches' owner | *Scheduled searches* section: check the status and use *Test*; check the index permissions |
+| *Data <source>* check in error | no events in the source index for 15 minutes, wrong index or sourcetype, or index not allowed | click *Open in Search* on the line and adjust the source search |
+| Configuration page green, but the wall is empty | the display account cannot search the summary index | give the display account's role read access to the summary index |
+| *Read by the wall* check: "Cannot find artifacts" | the daily total search (`wall_cumul`) has not run in the last 20 minutes | check `wall_cumul` in *Scheduled searches*; it runs 2 minutes after each 5-minute mark |
+| "Scheduled searches late" on the wall | no new batch for 12 minutes | the scheduler is overloaded or the searches are disabled: see *Troubleshooting* |
+
+## Counters look wrong
+
+- **Counters twice as high as expected.** The app runs on several search heads and each one schedules its searches. The app keeps only one search head per run, so counters stay correct, but the work runs twice. Disable the searches on the search head that does not display the wall. The *Scheduled searches* section shows this case as "Also scheduled elsewhere".
+- **Fewer attacks than in your usual searches.** The wall only keeps events it can place on the map:
+  - events whose source IP cannot be geolocated (private addresses, addresses unknown to the GeoIP database) are dropped;
+  - so are the countries excluded in the configuration.
+
+  Use **Validate** on the source to see what it returns before this step.
+- **Counters but no arcs.** The events have no coordinates: private IPs, or an origin masked on purpose (CDN, proxy). Masked origins are counted but draw no arc.
+- **The day's curve is shifted by one or two hours.** The display account's time zone differs from the screen's. Align it in the account preferences.
+- **A source shows in grey.** Its label does not match any declared source. Check the label of the source, or reload the wall after adding a source.
+
+## Adding or editing sources
+
+| Symptom | Fix |
+|---|---|
+| An added source does not appear on the wall | it shows up after its first run (5 to 10 minutes). If it still does not, use *Test*: the search may fail |
+| *Validate* reports "unknown dc" | the `dc` field must hold the id of a declared site; unknown values are attached to the default site |
+| *Validate* reports "without src_ip" | the search must return the attacker IP in `src_ip` |
+| *Validate* reports invalid severities | use `critical`, `high`, `medium`, `low` or `informational`; other values count as `medium` |
+| "Change refused" when saving | your role cannot create scheduled searches in the app: use an `admin` or `sc_admin` account |
+| IP and attack on different log lines (sessions) | set a look-back delay on the source and keep the batch with `where _time >= $WINDOW_START$` |
+
+## Team and schedule
+
+- **"Collection … unreachable" right after install.** Splunk loads new KV store collections at the next search head restart. The wall keeps working in the meantime, with an empty team banner.
+- **"Today's schedule to be filled in" on the wall.** There is no entry for today. Fill in the schedule, or use *Create a sample schedule*.
+- **An analyst shows initials instead of a photo.** Their name in the schedule does not match a saved analyst, or they have no photo. Add the photo in the *Analysts* section.
+- **Changes do not show on the wall.** The wall reloads the team every 10 minutes.
+
+## Replay
+
+- **Nothing to replay before a given time.** Only what the scheduled searches copied to the summary index can be replayed: nothing before the installation, or before a source was added.
+- **The last 10 minutes cannot be replayed.** This is expected: they are not in the summary index yet.
+
+## After an upgrade
+
+- **The wall still shows the old version.** Reload the page. Static files carry the version number: if the version number did not change, the browser keeps the old file.
+- **Check the loaded version** in the browser console with `__mur.version`, or on the *App and search head* line of *Getting started*.
+
+## Useful searches
+
+Scheduler runs of the app:
+
+```
+index=_internal sourcetype=scheduler app=soc_attack_wall savedsearch_name=wall_*
+| stats count(eval(status="success")) as ok, count as total, latest(status) as last_status by savedsearch_name, host
+```
+
+Batches written to the summary index, one per run and source, over the last hour:
+
+```
+index=summary search_name=wall_* meta=1 earliest=-1h
+| stats dc(search_now) as batches, max(_time) as latest by search_name, host
+| convert ctime(latest)
+```
+
+## Contact
+
+Questions, problems or suggestions: **contact@socops.fr**
+
+To help us help you, please include:
+- the app version (`__mur.version`);
+- your Splunk version;
+- the *Getting started* lines in error, and the related *Troubleshooting* entries.
+
+Remove any data specific to your organisation first.
+
+Bug reports and contributions are also welcome on GitHub: https://github.com/soc-ops-cyber/soc-attack-wall
+
+
+SCREENSHOTS (dist/release-1.2.1/screenshots/, fictitious data)
+-----------------------------------------------------------------
+1-wall-horizontal.png      The wall on a single horizontal screen (1920 x 1080)
+2-wall-vertical.png        The wall on two stacked screens (1920 x 2160)
+3-wall-replay.png          Replaying a spike from earlier in the day
+4-configuration.png        Configuration page: post-install checks
+5-sources.png              Attack sources: demo sources and a source added from the page
+6-add-source.png           Adding a source from a template, validated against the data
+7-schedule.png             On-duty schedule
+8-scheduled-searches.png   Scheduled search status

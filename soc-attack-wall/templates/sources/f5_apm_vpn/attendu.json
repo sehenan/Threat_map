@@ -1,0 +1,3 @@
+{ "lignes": 1,
+  "valeurs": { "src_ip": ["203.0.113.50"], "signature": ["Refus VPN"], "dest_host": ["Portail"], "severity": ["medium"], "dc": ["DC-NORD"] },
+  "_note": "l'IP vient de la ligne d'ouverture de la meme session" }

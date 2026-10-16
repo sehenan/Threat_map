@@ -1,0 +1,15 @@
+# produits de build.py
+/build/
+/dist/
+/en/
+__pycache__/
+*.pyc
+
+# votre configuration et vos fichiers propres (recherches, logo, photos) :
+# ils ne partent pas dans le depot public
+/config/wall.json
+/config/local/
+
+# secrets de test
+.env
+*.token

@@ -1,0 +1,31 @@
+source,s,signature,severity
+waf,0,SQL Injection,critical
+waf,1,Cross-Site Scripting,high
+waf,2,Path Traversal,high
+waf,3,Command Injection,critical
+waf,4,Scanner,medium
+waf,5,Remote File Inclusion,high
+ids,0,Port Scan,medium
+ids,1,Exploit Attempt,critical
+ids,2,C2 Beaconing,critical
+ids,3,Brute Force SMB,high
+ids,4,Malware Callback,critical
+ids,5,Suspicious DNS,medium
+mail,0,Hameçonnage,critical
+mail,1,Pièce jointe malveillante,critical
+mail,2,Usurpation,high
+mail,3,Spam,medium
+mail,4,Lien malveillant,high
+mail,5,Fraude au président,critical
+idp,0,Mot de passe invalide,high
+idp,1,Compte verrouillé,critical
+idp,2,Compte inexistant,high
+idp,3,Password spray,critical
+idp,4,MFA refusée,medium
+idp,5,Connexion à risque,high
+vpn,0,Refus VPN,medium
+vpn,1,Refus VPN,medium
+vpn,2,Refus VPN,high
+vpn,3,Certificat invalide,medium
+vpn,4,Compte désactivé,high
+vpn,5,Refus VPN,medium

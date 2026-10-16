@@ -1,0 +1,9 @@
+| makeresults count=4
+| streamstats count as i
+| eval _time = now() - 300 + i,
+       Country = if(i <= 2, "India", null()), src_lat = if(i <= 2, 20.59, null()), src_lon = if(i <= 2, 78.96, null()),
+       _raw = case(
+         i == 1, "{\"src_ip\":\"203.0.113.60\",\"signature\":\"Port Scan\",\"severity\":\"High\",\"dest_host\":\"fw-01.example.org\",\"action\":\"blocked\",\"dc\":\"CLOUD\"}",
+         i == 2, "{\"src\":\"203.0.113.61\",\"name\":\"Malware Detected\",\"severity\":\"critical\",\"dest\":\"pc-007\"}",
+         i == 3, "{\"title\":\"Backup failed\",\"severity\":\"low\",\"target\":\"srv-backup\"}",
+         true(), "{\"src_ip\":\"203.0.113.62\",\"severity\":\"low\"}")

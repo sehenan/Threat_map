@@ -1,0 +1,8 @@
+| makeresults count=3
+| streamstats count as i
+| eval _time = now() - 300 + i,
+       src = "203.0.113.20", Country = "China", src_lat = 35.86, src_lon = 104.19,
+       dest = "srv-web-01", attack = "Exploit",
+       severity = case(i == 1, "Critical", i == 2, "informational", true(), "Low"),
+       _raw = if(i == 1, "product=IPS attack_info=Apache Struts RCE (CVE-2017-5638)| action=Detect",
+                         "product=IPS attack_info=Port scan| action=Detect")

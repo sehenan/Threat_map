@@ -1,0 +1,7 @@
+| makeresults count=3
+| streamstats count as i
+| eval _time = now() - 300 + i,
+       ClientIP = case(i == 1, "203.0.113.40:51234", true(), "203.0.113.41"),
+       Country = "Brazil", src_lat = -14.23, src_lon = -51.92,
+       ErrorNumber = case(i == 1, 50053, i == 2, 50126, true(), 50057),
+       UserId = "j.dupont@example.org"

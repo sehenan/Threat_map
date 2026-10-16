@@ -1,0 +1,32 @@
+search index=threatmap sourcetype="utmstack:alert"
+``` Template: UTMStack alerts (alerts forwarded to Splunk as JSON). ```
+``` Modele : alertes UTMStack (alertes transmises a Splunk en JSON).
+    A ADAPTER : index, sourcetype, id du site. UTMStack n'a pas d'add-on Splunk : les
+    alertes (index alert-* d'OpenSearch) sont a envoyer vers Splunk, par exemple par HEC.
+    Champs lus : id, name, severity ou severityLabel, adversary.* / target.* (v11)
+    ou source.* / destination.* (v10). ```
+| spath
+``` Splunk extrait deja les champs d'un evenement JSON recu par le HEC : spath les double.
+    On retire les doublons. ```
+| foreach * [ eval "<<FIELD>>" = mvdedup('<<FIELD>>') ]
+| dedup id
+``` UTMStack ecrit "-" quand il ne connait pas la valeur : traite comme absente.
+    Sans cible connue, la machine qui a emis le journal (dataSource). ```
+| eval src_ip = nullif(coalesce('adversary.ip', 'source.ip'), "-"),
+       dest_host = coalesce(nullif('target.host', "-"), nullif('destination.host', "-"),
+                            nullif('target.ip', "-"), nullif('destination.ip', "-"), dataSource),
+       signature = name
+| eval niveau = lower(coalesce(severityLabel, severity)),
+       severity = case(in(niveau, "critical", "4"), "critical", in(niveau, "high", "3"), "high",
+                       in(niveau, "medium", "2"), "medium", in(niveau, "low", "1"), "low", true(), "medium")
+``` alerte sans attaquant externe (IP privee ou absente) : comptee, sans arc sur la carte.
+    Ajoutez "Interne" a origins.masked_labels dans la configuration ```
+| eval interne = if(isnull(src_ip) OR cidrmatch("10.0.0.0/8", src_ip) OR cidrmatch("172.16.0.0/12", src_ip)
+                    OR cidrmatch("192.168.0.0/16", src_ip) OR cidrmatch("127.0.0.0/8", src_ip), 1, 0)
+| eval src_ip = coalesce(src_ip, "0.0.0.0"),
+       Country = if(interne == 1, "Interne", Country),
+       src_lat = if(interne == 1, "", src_lat),
+       src_lon = if(interne == 1, "", src_lon)
+| eval action = "alerted",
+       dc = "DC-NORD"
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action

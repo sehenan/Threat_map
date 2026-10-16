@@ -1,0 +1,24 @@
+search index=threatmap sourcetype="zabbix:problems"
+``` Template: Zabbix problems (real-time export or webhook, JSON). ```
+``` Modele : problemes Zabbix (export temps reel ou webhook, JSON).
+    A ADAPTER : index, sourcetype, id du site. Champs lus, ceux de l'export temps reel
+    de Zabbix : eventid, value (1 = probleme, 0 = retour a la normale), name,
+    severity (0 a 5), clock, hosts[].
+    Ce ne sont pas des attaques : pas d'origine, donc pas d'arc sur la carte. Ajoutez
+    "Interne" a origins.masked_labels dans la configuration. ```
+| spath
+``` Splunk extrait deja les champs d'un evenement JSON recu par le HEC : spath les double.
+    On retire les doublons. ```
+| foreach * [ eval "<<FIELD>>" = mvdedup('<<FIELD>>') ]
+| where tonumber(value) == 1
+| dedup eventid
+| eval _time = coalesce(tonumber(clock), _time),
+       niveau = tonumber(severity),
+       signature = name,
+       dest_host = coalesce(mvindex('hosts{}.name', 0), mvindex('hosts{}.host', 0))
+| eval severity = case(niveau == 5, "critical", niveau == 4, "high", niveau == 3, "medium",
+                       niveau == 2, "low", true(), "informational")
+| eval src_ip = "0.0.0.0", Country = "Interne", src_lat = "", src_lon = "",
+       action = "alerted",
+       dc = "DC-NORD"
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action

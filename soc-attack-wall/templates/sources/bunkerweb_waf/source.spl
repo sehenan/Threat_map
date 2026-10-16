@@ -1,0 +1,47 @@
+search index=threatmap sourcetype=bunkerweb "ModSecurity:"
+``` Template: BunkerWeb WAF (ModSecurity / OWASP CRS, nginx error log). ```
+``` Modele : WAF BunkerWeb (ModSecurity / OWASP CRS, journal d'erreurs nginx).
+    A ADAPTER : index, sourcetype, id du site. Ne couvre que ModSecurity : les refus
+    des autres protections de BunkerWeb (bad behavior, listes noires, pays) ont un
+    autre format de ligne. ```
+| rex field=_raw "\[client (?<ip_refus>[0-9a-fA-F\.:]+)\]"
+| rex field=_raw ", client: (?<ip_ligne>[0-9a-fA-F\.:]+),"
+| rex field=_raw "\[msg \"(?<msg>[^\"]*)\"\]"
+| rex field=_raw "\[severity \"(?<sev>\d+)\"\]"
+| rex field=_raw "\[unique_id \"(?<uid>[^\"]+)\"\]"
+| rex field=_raw "\[tag \"attack-(?<famille>[a-z\-]+)\"\]"
+``` score d'anomalie : dans le message (CRS 3) ou dans la variable evaluee (CRS 4) ```
+| rex field=_raw "(?:Total Score: |ANOMALY_SCORE' \(Value: .)(?<score>\d+)"
+| rex field=_raw ", server: (?<serveur>[^,]+),"
+| rex field=_raw ", host: \"(?<hote>[^\"]+)\""
+``` une requete = plusieurs lignes (une par regle declenchee, puis le refus) reliees par
+    unique_id : on garde une ligne par requete, avec la famille d'attaque la plus citee ```
+| eval src_ip = coalesce(ip_refus, ip_ligne), famille = if(famille == "generic", null(), famille)
+| eval uid = coalesce(uid, src_ip . "|" . _time), refus = if(match(_raw, "Access denied"), 1, 0)
+| eventstats mode(famille) as famille, min(sev) as sev_min, max(score) as score_max, max(refus) as bloque,
+             count(eval(refus == 0)) as regles by uid
+| sort 0 uid, -refus
+| dedup uid
+| eval signature = case(famille == "sqli", "SQL Injection",
+                        famille == "xss", "Cross-Site Scripting",
+                        famille == "lfi", "Local File Inclusion",
+                        famille == "rfi", "Remote File Inclusion",
+                        famille == "rce", "Remote Code Execution",
+                        famille == "injection-php", "PHP Injection",
+                        famille == "injection-java", "Java Injection",
+                        famille == "fixation", "Session Fixation",
+                        famille == "protocol", "Protocol Violation",
+                        famille == "reputation-scanner", "Scanner",
+                        famille == "reputation-ip", "IP Reputation",
+                        isnotnull(famille), famille,
+                        true(), coalesce(nullif(replace(msg, "\s*\(Total.*$", ""), ""), "Inbound Anomaly Score Exceeded"))
+``` gravite : score d'anomalie CRS (5 par regle critique) ou nombre de regles declenchees,
+    sinon gravite de la regle ```
+| eval score_max = tonumber(score_max), sev_min = tonumber(sev_min)
+| eval severity = case(score_max >= 20 OR regles >= 6, "critical",
+                       score_max >= 10 OR regles >= 3, "high",
+                       score_max >= 5, "medium",
+                       sev_min <= 2, "high", sev_min == 3, "medium", true(), "low")
+| eval dest_host = coalesce(hote, serveur), action = if(bloque == 1, "blocked", "detect"),
+       dc = "DC-NORD"
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action

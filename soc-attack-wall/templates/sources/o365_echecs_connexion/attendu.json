@@ -1,0 +1,4 @@
+{ "lignes": 3,
+  "valeurs": { "src_ip": ["203.0.113.40", "203.0.113.41"], "signature": ["Compte verrouillé", "Mot de passe invalide", "Compte désactivé"],
+               "severity": ["critical", "high", "medium"], "dest_host": ["example.org"], "dc": ["CLOUD"] },
+  "_note": "port retire de ClientIP" }

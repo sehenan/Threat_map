@@ -1,0 +1,19 @@
+search index=cloud sourcetype=o365:management:activity Operation=UserLoginFailed
+``` Template: Microsoft 365 / Entra ID sign-in failures (Splunk Add-on for Microsoft Office 365). ```
+       ErrorNumber IN (50053, 50126, 50034, 50055, 50057)
+``` Modele : echecs de connexion Microsoft 365 / Entra ID (Splunk Add-on for Microsoft Office 365).
+    A ADAPTER : index. Codes : https://learn.microsoft.com/entra/identity-platform/reference-error-codes ```
+| eval src_ip = if(match(ClientIP, "^\d+\.\d+\.\d+\.\d+:\d+$"), replace(ClientIP, ":\d+$", ""), ClientIP)
+| eval signature = case(ErrorNumber == 50053, "Compte verrouillé",
+                        ErrorNumber == 50126, "Mot de passe invalide",
+                        ErrorNumber == 50034, "Compte inexistant",
+                        ErrorNumber == 50055, "Mot de passe expiré",
+                        ErrorNumber == 50057, "Compte désactivé",
+                        true(),               "Échec d'authentification"),
+       severity = case(ErrorNumber == 50053,          "critical",
+                       ErrorNumber IN (50126, 50034), "high",
+                       true(),                        "medium")
+``` cible : le domaine de l'identifiant tente (valeur choisie par l'attaquant : la page l'echappe) ```
+| eval dest_host = mvindex(split(UserId, "@"), 1), action = "blocked",
+       dc = "CLOUD"
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action

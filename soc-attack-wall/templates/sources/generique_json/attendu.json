@@ -1,0 +1,6 @@
+{ "lignes": 3,
+  "valeurs": { "signature": ["Port Scan", "Malware Detected", "Backup failed"],
+               "severity": ["high", "critical", "low"], "action": ["blocked", "alerted"],
+               "Country": ["India", "Interne"],
+               "dest_host": ["fw-01.example.org", "pc-007", "srv-backup"], "dc": ["CLOUD", "DC-NORD"] },
+  "_note": "ligne 4 ecartee (pas de signature) ; ligne 3 : pas d'IP -> Interne ; sans dc : site par defaut" }

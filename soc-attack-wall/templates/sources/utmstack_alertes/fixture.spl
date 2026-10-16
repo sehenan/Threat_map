@@ -1,0 +1,10 @@
+| makeresults count=5
+| streamstats count as i
+| eval _time = now() - 300 + i,
+       Country = if(i == 3 OR i == 5, null(), "Brazil"), src_lat = if(i == 3 OR i == 5, null(), -14.23), src_lon = if(i == 3 OR i == 5, null(), -51.92),
+       _raw = case(
+         i == 1, "{\"id\":\"a-1\",\"name\":\"Brute Force Attack\",\"severity\":3,\"severityLabel\":\"High\",\"adversary\":{\"ip\":\"203.0.113.50\"},\"target\":{\"host\":\"srv-web.example.org\",\"ip\":\"192.0.2.20\"}}",
+         i == 2, "{\"id\":\"a-2\",\"name\":\"Port Scan Detected\",\"severity\":2,\"source\":{\"ip\":\"203.0.113.51\"},\"destination\":{\"ip\":\"192.0.2.21\"}}",
+         i == 3, "{\"id\":\"a-3\",\"name\":\"Suspicious PowerShell Execution\",\"severity\":1,\"severityLabel\":\"Low\",\"adversary\":{\"ip\":\"10.0.0.5\"},\"target\":{\"host\":\"pc-042\"}}",
+         i == 5, "{\"id\":\"a-4\",\"name\":\"Process Masquerading Detection\",\"severity\":3,\"severityLabel\":\"High\",\"adversary\":{\"ip\":\"-\",\"host\":\"-\"},\"target\":{\"user\":\"SYSTEM\"},\"dataSource\":\"lapt-017\"}",
+         true(), "{\"id\":\"a-1\",\"name\":\"Brute Force Attack\",\"severity\":3,\"severityLabel\":\"High\",\"adversary\":{\"ip\":\"203.0.113.50\"},\"target\":{\"host\":\"srv-web.example.org\"}}")

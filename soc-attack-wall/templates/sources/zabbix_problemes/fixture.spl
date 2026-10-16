@@ -1,0 +1,8 @@
+| makeresults count=4
+| streamstats count as i
+| eval _time = now() - 300 + i,
+       _raw = case(
+         i == 1, "{\"clock\":" . (now() - 200) . ",\"value\":1,\"eventid\":101,\"name\":\"Zabbix agent is not available\",\"severity\":5,\"hosts\":[{\"host\":\"srv-db-01\",\"name\":\"srv-db-01.example.org\"}]}",
+         i == 2, "{\"clock\":" . (now() - 190) . ",\"value\":1,\"eventid\":102,\"name\":\"High CPU utilization\",\"severity\":3,\"hosts\":[{\"host\":\"srv-web-01\",\"name\":\"srv-web-01.example.org\"}]}",
+         i == 3, "{\"clock\":" . (now() - 180) . ",\"value\":0,\"eventid\":103,\"p_eventid\":90,\"name\":\"Disk space is low\",\"severity\":2}",
+         true(), "{\"clock\":" . (now() - 170) . ",\"value\":1,\"eventid\":104,\"name\":\"Interface down\",\"severity\":1,\"hosts\":[{\"host\":\"sw-core-01\",\"name\":\"sw-core-01\"}]}")

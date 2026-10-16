@@ -1,0 +1,12 @@
+search index=firewall sourcetype="cp_log:syslog" product=IPS attack=*
+``` Template: Check Point IPS (Splunk Add-on for Check Point). ```
+``` Modele : IPS Check Point (Splunk Add-on for Check Point). A ADAPTER : index. ```
+| search severity!=informational
+| rex field=_raw "attack_info=(?<info>.*?)\|"
+``` signature sans le numero de CVE : une meme attaque sur une seule ligne ```
+| eval signature = trim(replace(coalesce(info, attack), "\(CVE-\d{4}-\d+\)", ""))
+| eval severity = lower(severity),
+       severity = case(severity == "critical", "critical", severity == "high", "high", true(), "medium")
+| eval src_ip = src, dest_host = dest, action = "detect",
+       dc = "DC-NORD"
+| fields _time, src_ip, Country, src_lat, src_lon, dc, severity, signature, dest_host, action

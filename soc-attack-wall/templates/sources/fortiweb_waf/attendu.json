@@ -1,0 +1,5 @@
+{ "lignes": 3,
+  "valeurs": { "signature": ["SQL Injection", "Cross Site Scripting", "Known Bots"],
+               "severity": ["high", "medium", "low"], "action": ["blocked", "alerted"],
+               "dest_host": ["www.example.org", "192.0.2.10"], "dc": ["DC-NORD"] },
+  "_note": "ligne 4 ecartee (Info) ; ligne 3 : sub_type N/A -> main_type, pas de http_host -> dst" }

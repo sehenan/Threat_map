@@ -1,0 +1,10 @@
+| makeresults count=4
+| streamstats count as i
+| eval _time = now() - 300 + i,
+       src = "203.0.113." . (20 + i), dst = "192.0.2.10",
+       Country = "China", src_lat = 35.86, src_lon = 104.19,
+       http_host = if(i == 3, null(), "www.example.org"),
+       main_type = case(i <= 2, "Signature Detection", i == 3, "Known Bots", true(), "HTTP Protocol Constraints"),
+       sub_type = case(i == 1, "SQL Injection", i == 2, "Cross Site Scripting", true(), "N/A"),
+       severity_level = case(i == 1, "High", i == 2, "Medium", i == 3, "Low", true(), "Info"),
+       action = case(i == 1, "Alert_Deny", i == 2, "Alert", i == 3, "Period_Block", true(), "Alert")

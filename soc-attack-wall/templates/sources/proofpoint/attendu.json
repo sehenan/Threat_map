@@ -1,0 +1,4 @@
+{ "lignes": 3,
+  "valeurs": { "signature": ["inbound_phish", "spam_definite", "bulk"], "severity": ["critical", "high", "medium"],
+               "dc": ["CLOUD"], "action": ["blocked"] },
+  "_note": "signature vide ecartee" }

@@ -1,0 +1,11 @@
+| makeresults count=4
+| streamstats count as i
+| eval _time = now() - 300 + i,
+       src_ip = case(i <= 2, "203.0.113.7", i == 3, "198.18.0.10", true(), "192.0.2.99"),
+       Country = case(i <= 2, "Russia", i == 4, "Russia"),
+       src_lat = case(i <= 2, 61.52, i == 4, 61.52),
+       src_lon = case(i <= 2, 105.31, i == 4, 105.31),
+       app = "portail-2 #1",
+       dest_ip = if(i == 2, "10.1.2.3", "34.1.1.1"),
+       json_log = if(i == 4, "{\"events\":[{\"tokens\":{\"attackFamily\":\"No Attack Family\"}}]}",
+                             "{\"events\":[{\"tokens\":{\"attackFamily\":\"SQL Injection\"}}]}")

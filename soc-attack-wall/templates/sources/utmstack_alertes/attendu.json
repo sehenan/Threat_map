@@ -1,0 +1,6 @@
+{ "lignes": 4,
+  "valeurs": { "signature": ["Brute Force Attack", "Port Scan Detected", "Suspicious PowerShell Execution", "Process Masquerading Detection"],
+               "severity": ["high", "medium", "low"], "action": ["alerted"],
+               "Country": ["Brazil", "Interne"],
+               "dest_host": ["srv-web.example.org", "192.0.2.21", "pc-042", "lapt-017"], "dc": ["DC-NORD"] },
+  "_note": "ligne 4 : meme id que la ligne 1, ecartee ; ligne 2 : format v10 (source / destination), gravite numerique ; ligne 3 : IP privee -> Interne ; ligne 5 : IP \"-\" (inconnue) -> Interne, cible = dataSource" }
